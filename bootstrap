@@ -1,0 +1,63 @@
+prog=$0
+
+show_usage() {
+    echo "Invalid arguments"
+    echo "Usage: ${prog} [--npm-install] [--skip-python]"
+    exit 1
+}
+
+exit_npm_install () {
+    mv release.json package.json
+    exit 1
+}
+
+die() {
+    echo "$@"
+    exit 1
+}
+
+while (( "$#" )); do
+
+    case "$1" in
+        --npm)
+            skip_python=1
+            ;&
+        --npm-install)
+            npm_install=1
+            ;;
+        --latest-tulsa-bundle)
+            latest_tulsa_bundle=1
+            ;;
+        --skip-python)
+            skip_python=1
+            ;;
+        *)
+            show_usage
+            ;;
+    esac
+
+shift
+
+done
+
+if [ "$skip_python" != "1" ]; then
+
+    if [ ! -d "env" ]; then
+        virtualenv env --system-site-packages
+    fi
+
+    ln -sf env/bin/activate
+    . ./activate
+
+    # upgrade pip
+    pip install --upgrade pip
+
+    # Install wheel
+    pip install --upgrade wheel \
+        || die "Could not install wheel from pypi! Cannot continue"
+
+    pip install --upgrade -r requirements.pip \
+        || die "Could not install python packages from pypi! Cannot continue"
+
+fi
+
