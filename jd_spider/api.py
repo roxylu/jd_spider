@@ -6,6 +6,7 @@ from .utils import get_url
 
 SEARCH_URI = 'https://search.jd.com/Search'
 COMMENT_URI = 'https://sclub.jd.com/comment/productPageComments.action'
+CALLBACK_STR = 'fetchJSON_comment98vv36285'
 
 
 class JDong(object):
@@ -27,7 +28,7 @@ class JDong(object):
             img = goods.xpath('div/div[1]/a/img/@src')
             price_type = goods.xpath('div/div[3]/strong/em/text()')
             price_data = goods.xpath('div/div[3]/strong/i/text()')
-            name = goods.xpath('div/div[4]/a/@title')
+            name = goods.xpath('div/div[4]/a/em/text()')
             comment = goods.xpath('div/div[5]/strong/a/text()')
             uid = re.findall('jd.com/(.*?).html', link[0]) if link else None
 
@@ -50,16 +51,15 @@ class JDong(object):
                 })
         return relist
 
-    def comment(self, product_id, page=1):
+    def comment(self, product_id, page=0):
         """
         Get comments for a single product.
         """
-        url = COMMENT_URI + '?productId={}&score=0&sortType=3&' + \
-            'page={}&pageSize=10&callback=fetchJSON_comment98vv157'.format(
+        url = COMMENT_URI + '?callback=' + CALLBACK_STR + '&productId={}&score=0&sortType=5&page={}&pageSize=10'.format(
                 product_id, page)
         text = get_url(url)
         text = text.replace('javascript:void(0);', '')
-        data = re.findall('fetchJSON_comment98vv157\((.*?)\}\);', text)
+        data = re.findall(CALLBACK_STR + '\((.*?)\}\);', text)
         if data:
             try:
                 data = data[0] + '}'
@@ -109,7 +109,7 @@ class JDong(object):
         skuids = []
         for i in color_size:
             try:
-                skuids.append(str(i['SkuId']))
+                skuids.append(str(i['skuId']))
             except Exception as e:
                 print e
                 pass
