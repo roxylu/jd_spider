@@ -25,6 +25,7 @@ class JDong(object):
         relist = []
         for goods in goodslist:
             link = goods.xpath('div/div[1]/a/@href')
+            # TODO image only loads for the first 10 products
             img = goods.xpath('div/div[1]/a/img/@src')
             price_type = goods.xpath('div/div[3]/strong/em/text()')
             price_data = goods.xpath('div/div[3]/strong/i/text()')
