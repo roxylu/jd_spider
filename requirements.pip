@@ -1,2 +1,6 @@
 requests
 pymongo
+numpy
+matplotlib
+jieba
+wordcloud
