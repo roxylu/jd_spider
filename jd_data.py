@@ -18,8 +18,8 @@ def print_search_result(results):
         print "Image: %s" % result['img']
 
 
-def print_color_size(color_sizes):
-    for color_size in color_sizes:
+def print_color_size(sku_list):
+    for color_size in sku_list:
         print "=========================================="
         for key, value in color_size.items():
             print key, value
@@ -31,6 +31,25 @@ def print_comments(comments):
         print comment['content']
 
 
+def bulk_update_collection(entries, key, collection="products"):
+    """
+    Perform bulk update to collection to keep it updated.
+    Insert a new entry if key does not exist.
+    Using products collection by default.
+    """
+    for entry in entries:
+        db[collection].update({key: entry[key]}, entry, upsert=True)
+
+
+def update_fields(key_name, key_value, field, value, collection="products"):
+    """
+    Update field with provided value for entries
+    that match key_name - key_value.
+    Using products collection by default.
+    """
+    db[collection].update({key_name: key_value}, {"$set": {field: value}})
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-k', dest='keyword', help='specify search keyword')
@@ -38,7 +57,7 @@ def main():
     args = parser.parse_args()
     keyword = args.keyword
     comment_page = args.page
-    if keyword == None:
+    if keyword is None:
         parser.print_help()
         exit(0)
 
@@ -49,6 +68,7 @@ def main():
     print "[+] Total result: %d" % len(results)
     print "[+] Listing the top 10"
     print_search_result(results[:10])
+    bulk_update_collection(results, "uid")
 
     # UID
     uid = results[0]['uid']
@@ -58,17 +78,20 @@ def main():
 
     # SKU
     print "[+] Looking into the sku items"
-    color_sizes = jd.get_color_size(uid)
-    print_color_size(color_sizes)
+    sku_list = jd.get_color_size(uid)
+    print_color_size(sku_list)
+    update_fields("uid", uid, "sku", sku_list)
 
     # Comment Pages
     comment_pages = jd.get_comment_page(uid)
     print "[+] Total comment pages: %s" % comment_pages
+    update_fields("uid", uid, "comment_pages", comment_pages)
 
     # Comments
     comments = jd.comment(uid, comment_page).get('comments')
     print "[+] Reading comments on page %d" % comment_page
     print_comments(comments)
+    bulk_update_collection(comments, "id", collection="comments")
 
 
 if __name__ == '__main__':
