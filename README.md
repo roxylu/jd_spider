@@ -7,3 +7,7 @@
 ```
 ./bootstrap
 ```
+or
+```
+pip install -r requirements.pip
+```
