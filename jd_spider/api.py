@@ -6,6 +6,7 @@ from .utils import get_url
 
 SEARCH_URI = 'https://search.jd.com/Search'
 COMMENT_URI = 'https://sclub.jd.com/comment/productPageComments.action'
+ITEM_URI = 'https://item.jd.com/'
 CALLBACK_STR = 'fetchJSON_comment98vv36285'
 
 
@@ -87,7 +88,7 @@ class JDong(object):
         """
         Get color size info.
         """
-        url = 'https://item.jd.com/{}.html'.format(product_id)
+        url = ITEM_URI + '{}.html'.format(product_id)
         text = get_url(url)
         text = text.replace(' ', '')
         if 'colorSize:{}' in text or 'colorSize' not in text:
